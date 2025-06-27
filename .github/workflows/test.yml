@@ -11,7 +11,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        python-version: ['3.8', '3.9', '3.10', '3.11', '3.12', '3.13.0-rc.2']
+        python-version: ['3.13']
         os: [macos-13, macos-latest, ubuntu-latest, ubuntu-24.04-arm, windows-latest]
 
     steps:
@@ -47,20 +47,57 @@ jobs:
       run: |
         python3 -m pip install --upgrade build
 
-    - name: Test Installation From Tarball
+    - name: Build
       shell: bash
       run: |
         python3 -m build
-        twine check dist/*.tar.gz
+        twine check dist/*
+
+    - name: Test Installation From Tarball
+      shell: bash
+      run: |
         python3 -m pip install --force-reinstall dist/*.tar.gz
         python3 tests/test_fast-zip-decryption.py
+
+    - uses: actions/upload-artifact@v4
+      with:
+        name: wheels-${{ matrix.os }}
+        path: "dist/*.whl"
+
+  Test-Wheel-Compatibility:
+    runs-on: ${{ matrix.os }}
+    needs: [Tests]
+    strategy:
+      matrix:
+        python-version: ['3.8', '3.9', '3.10', '3.11', '3.12', '3.13']
+        os: [macos-13, macos-latest, ubuntu-latest, ubuntu-24.04-arm, windows-latest]
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: true
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install Dependencies
+      if: matrix.os == 'ubuntu-latest'
+      run: |
+        sudo apt-get -y install zip
+
+    - name: Install Python Modules
+      run: |
+        python3 -m pip install --upgrade pip
+        python3 -m pip install --upgrade-strategy eager --upgrade pyminizip
+
+    - uses: actions/download-artifact@v4
+      with:
+        name: wheels-${{ matrix.os }}
 
     - name: Test Installation From Wheel
       shell: bash
       run: |
-        python3 -m build
-        twine check dist/*.whl
-        # https://blog.trailofbits.com/2022/11/15/python-wheels-abi-abi3audit/
-        abi3audit dist/*.whl
-        python3 -m pip install dist/*.whl
+        python3 -m pip install --no-index --find-links . fast_zip_decryption
         python3 tests/test_fast-zip-decryption.py

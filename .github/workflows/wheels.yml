@@ -45,7 +45,12 @@ jobs:
       run: python -m cibuildwheel --output-dir dist
 
     - name: Check Wheels
-      run: twine check dist/*
+      shell: bash
+      run: |
+        twine check dist/*
+        test -f dist/*abi3* && abi3
+        # https://blog.trailofbits.com/2022/11/15/python-wheels-abi-abi3audit/
+        abi3audit dist/*.whl
 
     - uses: actions/upload-artifact@v4
       # Upload some wheels for manual inspection. We don't need all of them.
