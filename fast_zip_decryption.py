@@ -20,6 +20,7 @@ class FastZipExtFile(zipfile.ZipExtFile):
         This method adheres to new interface of _zipfile._ZipDecrypter because interface of
         _zipfile._ZipDecrypter changed by commit no 06e522521c06671b4559eecf9e2a185c2d62c141
         in bpo-10030.
+        https://github.com/python/cpython/pull/550
 
         Old interface of decrypter accepts one int at a time while the new interface accepts
         a bytes object.
@@ -95,7 +96,7 @@ def monkeypatch():
             with archive.open(archive.infolist()[0]) as file:
                 assert file.read() == b"secret\n"
     except Exception as exception:
-        tb = ''.join(traceback.format_exception(exception))
+        tb = ''.join(traceback.format_exc())
         warnings.warn(f"Will not patch faster decryption because it would lead to: {type(exception)} {exception}\n{tb}")
         zipfile.ZipExtFile = OldZipExtFile
         zipfile._ZipDecrypter = OldZipDecrypter
