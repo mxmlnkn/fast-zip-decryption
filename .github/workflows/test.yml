@@ -32,7 +32,7 @@ jobs:
     - name: Install Python Modules
       run: |
         python3 -m pip install --upgrade pip
-        python3 -m pip install --upgrade-strategy eager --upgrade cibuildwheel twine pyminizip abi3audit
+        python3 -m pip install --upgrade-strategy eager --upgrade cibuildwheel twine pyminizip
 
     - name: Install Python Modules (Windows)
       if: matrix.os == 'windows-latest'
@@ -90,7 +90,7 @@ jobs:
     - name: Install Python Modules
       run: |
         python3 -m pip install --upgrade pip
-        python3 -m pip install --upgrade-strategy eager --upgrade pyminizip
+        python3 -m pip install --upgrade-strategy eager --upgrade pyminizip abi3audit
 
     - uses: actions/download-artifact@v4
       with:
@@ -99,5 +99,6 @@ jobs:
     - name: Test Installation From Wheel
       shell: bash
       run: |
+        abi3audit *abi3*.whl
         python3 -m pip install --no-index --find-links . fast_zip_decryption
         python3 tests/test_fast-zip-decryption.py

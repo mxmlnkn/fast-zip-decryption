@@ -30,7 +30,7 @@ jobs:
     - name: Install Dependencies
       run: |
         python3 -m pip install --upgrade pip
-        python3 -m pip install --upgrade-strategy eager --upgrade cython twine cibuildwheel~=2.0 build
+        python3 -m pip install --upgrade-strategy eager --upgrade cython twine cibuildwheel~=2.0 build abi3audit
 
     - name: Build Tarball
       # Only one out of the OS matrix needs to upload the tarball.
@@ -48,9 +48,9 @@ jobs:
       shell: bash
       run: |
         twine check dist/*
-        test -f dist/*abi3* && abi3
         # https://blog.trailofbits.com/2022/11/15/python-wheels-abi-abi3audit/
-        abi3audit dist/*.whl
+        test -n "$( find dist -name '*abi3*.whl' )" && abi3audit dist/*abi3*.whl
+
 
     - uses: actions/upload-artifact@v4
       # Upload some wheels for manual inspection. We don't need all of them.
