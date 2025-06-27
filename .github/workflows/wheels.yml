@@ -25,12 +25,12 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
-        python-version: '3.10'
+        python-version: '3.13'
 
     - name: Install Dependencies
       run: |
         python3 -m pip install --upgrade pip
-        python3 -m pip install --upgrade-strategy eager --upgrade cython twine cibuildwheel build
+        python3 -m pip install --upgrade-strategy eager --upgrade cython twine cibuildwheel~=2.0 build
 
     - name: Build Tarball
       # Only one out of the OS matrix needs to upload the tarball.
@@ -40,6 +40,7 @@ jobs:
     - name: Build Wheels
       env:
         CIBW_ARCHS: ${{ matrix.archs }}
+        CIBW_ENABLE: pypy
         CIBW_MANYLINUX_X86_64_IMAGE: ${{ matrix.manylinux-image }}
       run: python -m cibuildwheel --output-dir dist
 
