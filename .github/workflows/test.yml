@@ -2,7 +2,7 @@ name: Python Module Tests
 
 on:
   push:
-    branches: ["master", "develop"]
+    branches: ["*"]
   pull_request:
   workflow_dispatch:
 
@@ -68,6 +68,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     needs: [Tests]
     strategy:
+      fail-fast: false
       matrix:
         python-version: ['3.8', '3.9', '3.10', '3.11', '3.12', '3.13']
         os: [macos-13, macos-latest, ubuntu-latest, ubuntu-24.04-arm, windows-latest]
